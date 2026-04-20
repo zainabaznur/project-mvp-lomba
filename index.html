@@ -575,6 +575,25 @@
     'kantor': 'aset4.glb',
     'default': 'aset1.glb'
 };
+// Ganti baris viewer.src = selectedModel; dengan blok ini:
+
+console.log("Switching to model:", selectedModel);
+
+// 1. Tampilkan poster loading secara manual sebelum ganti src
+viewer.showPoster(); 
+
+// 2. Update Source
+viewer.src = selectedModel;
+
+// 3. Tambahkan event listener khusus agar poster hilang saat model siap
+viewer.addEventListener('load', () => {
+    console.log("Successfully loaded:", selectedModel);
+    viewer.dismissPoster();
+    
+    // Opsional: Paksa kamera fokus ke objek baru
+    viewer.cameraOrbit = "0deg 75deg 5m";
+    viewer.fieldOfView = "30deg";
+}, { once: true }); // Pakai { once: true } supaya tidak numpuk listenernya
 
   function openModal() { document.getElementById('ai-modal').classList.add('active'); }
   function closeModal() { document.getElementById('ai-modal').classList.remove('active'); }
