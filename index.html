@@ -522,22 +522,14 @@
         </div>
         
         <model-viewer id="ai-3d-model" 
-          src="aset1.glb" 
+          src="./aset1.glb" 
           auto-rotate 
           camera-controls 
           shadow-intensity="1" 
           environment-image="neutral"
-          exposure="1"
           interaction-prompt="none"
           loading="eager"
-          bounds="tight"
-          enable-pan
-          style="width: 100%; height: 100%; min-height: 400px; background-color: transparent;"
           ar-status="not-presenting">
-          
-          <div slot="poster" style="display: flex; justify-content: center; align-items: center; height: 100%; color: #00fd93; font-family: monospace; font-size: 12px; letter-spacing: 2px;">
-             INITIALIZING_3D_RENDER...
-          </div>
         </model-viewer>
 
         <div class="mt-6 flex gap-6 border-t border-white/5 pt-6 w-full justify-center">
@@ -564,36 +556,17 @@
 
   // 2. Mapping
   const ASSET_LIBRARY = {
-    'minimalis': 'aset1.glb',
-    'modern': 'aset1.glb',
-    'mewah': 'aset2.glb',
-    'luxury': 'aset2.glb',
-    'villa': 'aset2.glb',
-    'klasik': 'aset3.glb',
-    'vintage': 'aset3.glb',
-    'industri': 'aset4.glb',
-    'kantor': 'aset4.glb',
-    'default': 'aset1.glb'
-};
-// Ganti baris viewer.src = selectedModel; dengan blok ini:
-
-console.log("Switching to model:", selectedModel);
-
-// 1. Tampilkan poster loading secara manual sebelum ganti src
-viewer.showPoster(); 
-
-// 2. Update Source
-viewer.src = selectedModel;
-
-// 3. Tambahkan event listener khusus agar poster hilang saat model siap
-viewer.addEventListener('load', () => {
-    console.log("Successfully loaded:", selectedModel);
-    viewer.dismissPoster();
-    
-    // Opsional: Paksa kamera fokus ke objek baru
-    viewer.cameraOrbit = "0deg 75deg 5m";
-    viewer.fieldOfView = "30deg";
-}, { once: true }); // Pakai { once: true } supaya tidak numpuk listenernya
+    'minimalis': './aset1.glb',
+    'modern': './aset1.glb',
+    'mewah': './aset2.glb',
+    'luxury': './aset2.glb',
+    'villa': './aset2.glb',
+    'klasik': './aset3.glb',
+    'vintage': './aset3.glb',
+    'industri': './aset4.glb',
+    'kantor': './aset4.glb',
+    'default': './aset1.glb'
+  };
 
   function openModal() { document.getElementById('ai-modal').classList.add('active'); }
   function closeModal() { document.getElementById('ai-modal').classList.remove('active'); }
@@ -654,9 +627,7 @@ viewer.addEventListener('load', () => {
         }
 
         viewer.src = selectedModel;
-        viewer.dismissPoster(); 
         statusLabel.innerText = modelName + " Loaded";
-        console.log("Mencoba akses: " + window.location.href + selectedModel);
 
         // C. Supabase Dynamic Pricing
         const { data: dbData } = await _supabase.from('material_prices').select('*').limit(4);
@@ -693,26 +664,12 @@ viewer.addEventListener('load', () => {
     }
   }
 
-// Pastikan ini ditaruh di paling bawah sebelum tutup tag
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM fully loaded and parsed");
-    
-    // Cari semua tombol yang punya teks "Start Project" secara spesifik
-    const startButtons = Array.from(document.querySelectorAll('button, a')).filter(el => 
-        el.textContent.toLowerCase().includes('start project')
-    );
-
-    if (startButtons.length > 0) {
-        startButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log("Tombol Start Project diklik!");
-                openModal();
-            });
-        });
-    } else {
-        console.warn("Tombol 'Start Project' tidak ditemukan di halaman ini.");
+  // Event listener untuk tombol di luar komponen
+  document.addEventListener('click', (e) => {
+    if(e.target.innerText && e.target.innerText.toLowerCase().includes("start project")) {
+      e.preventDefault();
+      openModal();
     }
-});
+  });
 </script>
 </body></html>
