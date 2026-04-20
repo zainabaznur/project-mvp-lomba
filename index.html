@@ -407,97 +407,119 @@
 </div>
 </footer>
 <script>
-  // CONFIG & DATABASE
+  // 1. KONEKSI & KONFIGURASI
   const SUPABASE_URL = 'https://dmjoadaxsbazhuarujoa.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_J7gst2a7Y0UNPo436g041A_Ym1XGuO8';
   const GEMINI_KEY = 'AIzaSyA9-NJYjsKN1t-3txysTCdJFFwtCYJoUfY';
   const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // FUNGSI MODAL (Hanya memanipulasi elemen, tidak ubah file CSS)
-  window.openModal = function() { 
+  // 2. LOGIKA MODAL (Didaftarkan ke window agar onclick="openModal()" pasti jalan)
+  window.openModal = function() {
     const modal = document.getElementById('ai-modal');
     if (modal) {
-        // Kita ubah display-nya lewat JS supaya CSS asli kamu aman
-        modal.style.display = 'flex'; 
-        setTimeout(() => modal.classList.add('active'), 10);
+      // Menggunakan inline style untuk menjamin tampilan tanpa ubah CSS kamu
+      modal.style.display = 'flex';
+      // Memberikan jeda 10ms agar transisi opacity di CSS kamu terpicu
+      setTimeout(() => {
+        modal.classList.add('active');
+      }, 10);
+    } else {
+      console.error("Elemen id='ai-modal' tidak ditemukan!");
     }
   };
 
-  window.closeModal = function() { 
+  window.closeModal = function() {
     const modal = document.getElementById('ai-modal');
     if (modal) {
-        modal.classList.remove('active');
-        setTimeout(() => modal.style.display = 'none', 300);
+      modal.classList.remove('active');
+      // Menunggu animasi selesai (300ms) sebelum menghilangkan display
+      setTimeout(() => {
+        modal.style.display = 'none';
+      }, 300);
     }
   };
 
-  // FUNGSI ANALISIS (Logika Aset .glb Zainab)
+  // 3. LOGIKA ANALISIS & PEMANGGILAN ASET .GLB
   async function executeAnalysis() {
     const promptInput = document.getElementById('ai-prompt');
+    const promptValue = promptInput.value;
     const btn = document.getElementById('run-ai');
     const viewer = document.getElementById('ai-3d-model');
     
-    if(!promptInput.value.trim()) return alert("Masukkan deskripsi proyek!");
+    if(!promptValue.trim()) return alert("Halo Insinyur, masukkan deskripsi proyek Anda!");
 
     btn.innerText = "Menganalisis...";
     btn.disabled = true;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: `Berikan JSON murni: {"analisis": "saran teknis", "luas": angka} untuk: "${promptInput.value}"` }]}]
-            })
+      // Panggil Gemini untuk mendapatkan saran & estimasi luas dalam format JSON
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `Analisis: "${promptValue}". Berikan jawaban JSON murni: {"analisis": "saran teknik singkat", "luas": angka_luas_m2}.` }]}]
+        })
+      });
+      
+      const jsonResp = await response.json();
+      const rawText = jsonResp.candidates[0].content.parts[0].text;
+      const aiData = JSON.parse(rawText.match(/\{.*\}/s)[0]);
+
+      // Ambil data dari Supabase
+      const { data: dbData } = await _supabase.from('material_prices').select('*');
+
+      let totalInvestasi = 0;
+      let listHtml = "";
+      const luasBase = aiData.luas || 50; // Default jika AI tidak deteksi angka
+
+      if (dbData) {
+        dbData.forEach(item => {
+          // Kalkulasi volume dinamis berdasarkan luas lahan
+          const volumeSimulasi = (luasBase * (Math.random() * 0.2 + 0.1)).toFixed(1);
+          const subTotal = Math.round(item.unit_price * volumeSimulasi);
+          totalInvestasi += subTotal;
+          
+          listHtml += `
+            <div class="flex justify-between items-center py-2 border-b border-white/5 text-[11px]">
+              <span class="text-slate-400">${item.material_name} (Vol: ${volumeSimulasi})</span>
+              <span class="text-white font-medium">Rp ${subTotal.toLocaleString()}</span>
+            </div>`;
         });
-        
-        const jsonResp = await response.json();
-        const aiData = JSON.parse(jsonResp.candidates[0].content.parts[0].text.match(/\{.*\}/s)[0]);
+      }
 
-        // Ambil data material dari Supabase
-        const { data: dbData } = await _supabase.from('material_prices').select('*');
+      // Update Tampilan Dashboard
+      document.getElementById('ai-result-area').classList.remove('hidden');
+      document.getElementById('gemini-text').innerText = aiData.analisis;
+      document.getElementById('material-list').innerHTML = listHtml;
+      document.getElementById('total-price').innerText = `Rp ${totalInvestasi.toLocaleString()}`;
 
-        let total = 0;
-        let listHtml = "";
-        const luas = aiData.luas || 50;
-
-        if (dbData) {
-            dbData.forEach(item => {
-                const vol = (luas * 0.15).toFixed(1);
-                const sub = Math.round(item.unit_price * vol);
-                total += sub;
-                listHtml += `<div class="flex justify-between py-2 border-b border-white/5 text-[11px]">
-                    <span>${item.material_name} (${vol})</span>
-                    <span>Rp ${sub.toLocaleString()}</span>
-                </div>`;
-            });
-        }
-
-        document.getElementById('ai-result-area').classList.remove('hidden');
-        document.getElementById('gemini-text').innerText = aiData.analisis;
-        document.getElementById('material-list').innerHTML = listHtml;
-        document.getElementById('total-price').innerText = `Rp ${total.toLocaleString()}`;
-
-        // SWITCH MODEL 3D (Aset lokal Zainab)
-        const low = promptInput.value.toLowerCase();
-        if (low.includes("rumah")) viewer.src = "aset1.glb";
-        else if (low.includes("villa")) viewer.src = "aset2.glb";
-        else if (low.includes("gedung")) viewer.src = "aset3.glb";
-        else if (low.includes("taman")) viewer.src = "aset4.glb";
-        else viewer.src = "aset1.glb";
+      // 4. LOGIKA SWITCH ASET .GLB (Sejajar index.html)
+      const low = promptValue.toLowerCase();
+      if (low.includes("rumah") || low.includes("minimalis")) {
+        viewer.src = "aset1.glb";
+      } else if (low.includes("villa") || low.includes("mewah") || low.includes("luxury")) {
+        viewer.src = "aset2.glb";
+      } else if (low.includes("gedung") || low.includes("kantor") || low.includes("office")) {
+        viewer.src = "aset3.glb";
+      } else if (low.includes("taman") || low.includes("outdoor") || low.includes("park")) {
+        viewer.src = "aset4.glb";
+      } else {
+        viewer.src = "aset1.glb"; // Default fallback
+      }
 
     } catch (err) {
-        alert("Gagal menganalisis.");
+      console.error("Error Analisis:", err);
+      alert("Terjadi gangguan koneksi analisis.");
     } finally {
-        btn.innerText = "Analisis Proyek";
-        btn.disabled = false;
+      btn.innerHTML = `<span class="material-symbols-outlined text-lg">temp_preferences_custom</span><span>Analisis Proyek</span>`;
+      btn.disabled = false;
     }
   }
 
-  // Tutup modal saat klik luar area modal
-  window.onclick = function(event) {
+  // Tutup modal jika klik di luar area konten (overlay)
+  window.addEventListener('click', (e) => {
     const modal = document.getElementById('ai-modal');
-    if (event.target == modal) closeModal();
-  }
+    if (e.target === modal) closeModal();
+  });
 </script>
 </body></html>
