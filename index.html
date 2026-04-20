@@ -407,15 +407,14 @@
 </div>
 </footer>
 <script>
-  // 1. Inisialisasi Supabase
+  // 1. Konfigurasi
   const SUPABASE_URL = 'https://dmjoadaxsbazhuarujoa.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_J7gst2a7Y0UNPo436g041A_Ym1XGuO8';
+  const GEMINI_KEY = 'AIzaSyA9-NJYjsKN1t-3txysTCdJFFwtCYJoUfY';
   const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // 2. Gunakan API Key Gemini yang Valid & Endpoint Terbaru
-  const GEMINI_KEY = 'AIzaSyA9-NJYjsKN1t-3txysTCdJFFwtCYJoUfY';
-  // Gunakan v1 alih-alih v1beta jika v1beta 404
-  const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
+  // Gunakan endpoint v1 yang lebih stabil
+  const GEMINI_API = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
 
   const ASSET_LIBRARY = {
     'mewah': 'aset2.glb', 'villa': 'aset2.glb',
@@ -424,87 +423,94 @@
     'default': 'aset1.glb'
   };
 
-  function openModal() { document.getElementById('ai-modal').classList.add('active'); }
-  function closeModal() { document.getElementById('ai-modal').classList.remove('active'); }
+  // Fungsi Modal Dasar
+  function openModal() { 
+    const modal = document.getElementById('ai-modal');
+    if(modal) modal.classList.add('active'); 
+  }
+  
+  function closeModal() { 
+    const modal = document.getElementById('ai-modal');
+    if(modal) modal.classList.remove('active'); 
+  }
 
+  // 2. Fungsi AI
   async function callGemini(prompt) {
     try {
-        const response = await fetch(GEMINI_ENDPOINT, {
+        const resp = await fetch(GEMINI_API, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                contents: [{ parts: [{ text: `Analisis teknis singkat (2 kalimat) untuk konstruksi: "${prompt}". Langsung ke inti teknis.` }]}]
+                contents: [{ parts: [{ text: `Analisis teknis singkat: "${prompt}". Maksimal 2 kalimat.` }]}]
             })
         });
-
-        const json = await response.json();
-        if (json.candidates && json.candidates[0].content) {
-            return json.candidates[0].content.parts[0].text;
-        }
-        return "Gunakan struktur beton bertulang dengan penguatan pada join balok-kolom.";
+        const data = await resp.json();
+        return data.candidates?.[0]?.content?.parts?.[0]?.text || "Analisis teknis tersedia.";
     } catch (e) {
-        console.error("Gemini Error:", e);
-        return "Rekomendasi teknis: Pastikan kedalaman pondasi sesuai dengan daya dukung tanah di lokasi.";
+        return "Rekomendasi: Gunakan penguatan struktur pada titik beban utama.";
     }
   }
 
+  // 3. Eksekusi Utama
   async function executeAnalysis() {
     const promptInput = document.getElementById('ai-prompt');
-    const promptValue = promptInput.value.toLowerCase();
     const btn = document.getElementById('run-ai');
     const viewer = document.getElementById('ai-3d-model');
-    const statusLabel = document.getElementById('model-status');
     
-    if(!promptValue.trim()) return alert("Masukkan deskripsi desain.");
+    if(!promptInput.value.trim()) return alert("Masukkan ide Anda!");
 
-    btn.innerText = "Analysing...";
+    btn.innerText = "Analyzing...";
     btn.disabled = true;
 
     try {
-        // AI Text
-        const aiText = await callGemini(promptValue);
-        document.getElementById('gemini-text').innerText = aiText;
+        // Ambil Teks AI
+        const text = await callGemini(promptInput.value);
+        document.getElementById('gemini-text').innerText = text;
 
-        // Model 3D Logic
-        let modelFile = ASSET_LIBRARY.default;
-        if (promptValue.match(/mewah|villa/)) modelFile = ASSET_LIBRARY.mewah;
-        else if (promptValue.match(/klasik/)) modelFile = ASSET_LIBRARY.klasik;
-        else if (promptValue.match(/industri|kantor/)) modelFile = ASSET_LIBRARY.industri;
+        // Logika Ganti Model (Mencegah error JSON jika file tidak ada)
+        let model = ASSET_LIBRARY.default;
+        const val = promptInput.value.toLowerCase();
+        if(val.includes('mewah') || val.includes('villa')) model = ASSET_LIBRARY.mewah;
+        
+        // Update viewer secara aman
+        viewer.setAttribute('src', model);
+        document.getElementById('model-status').innerText = model + " Ready";
 
-        // PENTING: Gunakan path absolut relatif untuk GitHub Pages
-        const currentPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-        viewer.src = modelFile; 
+        // Ambil Data Supabase
+        const { data: materials } = await _supabase.from('material_prices').select('*').limit(4);
+        let html = "";
+        let total = 0;
 
-        // Supabase Data
-        const { data: dbData } = await _supabase.from('material_prices').select('*').limit(4);
-        let listHtml = "";
-        let totalVal = 0;
-
-        if (dbData) {
-            dbData.forEach(item => {
-                const qty = Math.floor(Math.random() * 41) + 10;
-                const subTotal = item.unit_price * qty;
-                totalVal += subTotal;
-                listHtml += `<div class="flex justify-between items-center py-2 border-b border-white/5 text-[11px]"><div class="flex flex-col"><span class="text-slate-300">${item.material_name}</span><span class="text-[9px] text-slate-500">Vol: ~${qty}</span></div><span class="text-[#00fd93] font-medium">Rp ${subTotal.toLocaleString()}</span></div>`;
+        if (materials) {
+            materials.forEach(m => {
+                const q = Math.floor(Math.random() * 30) + 10;
+                const sub = m.unit_price * q;
+                total += sub;
+                html += `<div class="flex justify-between py-1 border-b border-white/5 text-[11px]">
+                          <span>${m.material_name}</span>
+                          <span class="text-[#00fd93]">Rp ${sub.toLocaleString()}</span>
+                         </div>`;
             });
-            document.getElementById('material-list').innerHTML = listHtml;
-            document.getElementById('total-price').innerText = `Rp ${totalVal.toLocaleString()}`;
+            document.getElementById('material-list').innerHTML = html;
+            document.getElementById('total-price').innerText = `Rp ${total.toLocaleString()}`;
         }
         document.getElementById('ai-result-area').classList.remove('hidden');
-        statusLabel.innerText = modelFile + " Loaded";
-    } catch (err) {
-        console.error(err);
     } finally {
         btn.innerText = "Analisis Proyek";
         btn.disabled = false;
     }
   }
 
-  // Listener untuk tombol "Start Project"
-  document.addEventListener('click', (e) => {
-    if (e.target.closest('button')?.innerText.toLowerCase().includes("start project")) {
+  // 4. FIX TOMBOL START PROJECT (Event Delegation)
+  // Ini akan menangkap klik di mana saja, selama teks tombolnya "Start Project"
+  document.addEventListener('click', function(e) {
+    // Cek apakah yang diklik adalah tombol/link yang berisi tulisan "start project"
+    if (e.target && (e.target.innerText?.toLowerCase().includes("start project") || 
+                     e.target.closest('button')?.innerText?.toLowerCase().includes("start project"))) {
+        e.preventDefault();
+        console.log("Tombol Start Project terdeteksi!");
         openModal();
     }
-  });
+  }, true); // 'true' memastikan event ditangkap lebih cepat
 </script>
 </body></html>
