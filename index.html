@@ -556,17 +556,17 @@
 
   // 2. Mapping
   const ASSET_LIBRARY = {
-    'minimalis': './aset1.glb',
-    'modern': './aset1.glb',
-    'mewah': './aset2.glb',
-    'luxury': './aset2.glb',
-    'villa': './aset2.glb',
-    'klasik': './aset3.glb',
-    'vintage': './aset3.glb',
-    'industri': './aset4.glb',
-    'kantor': './aset4.glb',
-    'default': './aset1.glb'
-  };
+    'minimalis': 'aset1.glb',
+    'modern': 'aset1.glb',
+    'mewah': 'aset2.glb',
+    'luxury': 'aset2.glb',
+    'villa': 'aset2.glb',
+    'klasik': 'aset3.glb',
+    'vintage': 'aset3.glb',
+    'industri': 'aset4.glb',
+    'kantor': 'aset4.glb',
+    'default': 'aset1.glb'
+};
 
   function openModal() { document.getElementById('ai-modal').classList.add('active'); }
   function closeModal() { document.getElementById('ai-modal').classList.remove('active'); }
@@ -627,7 +627,9 @@
         }
 
         viewer.src = selectedModel;
+        viewer.dismissPoster(); 
         statusLabel.innerText = modelName + " Loaded";
+        console.log("Mencoba akses: " + window.location.href + selectedModel);
 
         // C. Supabase Dynamic Pricing
         const { data: dbData } = await _supabase.from('material_prices').select('*').limit(4);
