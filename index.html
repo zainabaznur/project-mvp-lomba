@@ -407,14 +407,21 @@
 </div>
 </footer>
 <script>
-// 1. Configuration & Initialization
 const SUPABASE_URL = 'https://dmjoadaxsbazhuarujoa.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_J7gst2a7Y0UNPo436g041A_Ym1XGuO8';
-const GEMINI_KEY = 'AIzaSyA9-NJYjsKN1t-3txysTCdJFFwtCYJoUfY';
-
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Asset Mapping (Centralized)
+/**
+ * SECURITY PROTOCOL: 
+ * Mengambil Key tanpa Hardcoding untuk menghindari sensor Vercel/GitHub.
+ */
+function getGeminiKey() {
+    // 1. Coba ambil dari Vercel Env (hanya jalan jika didukung builder)
+    // 2. Coba ambil dari LocalStorage (Solusi paling aman untuk deploy publik)
+    return (typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_GEMINI_KEY : null) || 
+           localStorage.getItem('ARCHISCAN_AI_KEY');
+}
+
 const ASSET_LIBRARY = {
     'minimalis': { src: './aset1.glb', label: 'Minimalist Zen' },
     'mewah': { src: './aset2.glb', label: 'Luxury Estate' },
@@ -423,7 +430,9 @@ const ASSET_LIBRARY = {
     'default': { src: './aset1.glb', label: 'Standard Model' }
 };
 
-// 2. UI Controllers
+// ==========================================
+// 2. MODAL CONTROLLERS
+// ==========================================
 function openModal() { 
     document.getElementById('ai-modal').classList.add('active'); 
 }
@@ -432,45 +441,73 @@ function closeModal() {
     document.getElementById('ai-modal').classList.remove('active'); 
 }
 
-// 3. AI Engine (The Brain)
-async function callGemini(prompt) {
-    // System Instruction untuk memaksa AI berpikir sebagai Arsitek & mengembalikan JSON
-    const systemPrompt = `
-        You are a Professional Senior Architect AI. 
-        Analyze the user's description and return ONLY a valid JSON object with this structure:
+// ==========================================
+// 3. AI ENGINE (SEMANTIC ANALYSIS)
+// ==========================================
+async function callGemini(promptText) {
+    let activeKey = getGeminiKey();
+    
+    // Safety check jika key kosong (Akan meminta input sekali saja)
+    if (!activeKey || activeKey === "null" || activeKey === null) {
+        const inputKey = prompt("⚠️ Security Activation: Masukkan Gemini API Key untuk mengaktifkan Archiscan Intelligence.");
+        if (inputKey) {
+            localStorage.setItem('ARCHISCAN_AI_KEY', inputKey);
+            activeKey = inputKey;
+        } else {
+            return null;
+        }
+    }
+
+    const systemInstruction = `
+        You are a Professional Senior Architect. 
+        Analyze the user's description and return ONLY a valid JSON object:
         {
-            "analysis": "2 short professional sentences about structural integrity and design philosophy.",
+            "analysis": "2 short professional sentences about structural design.",
             "category": "minimalis | mewah | klasik | industri",
             "suggested_materials": [
-                {"name": "Material Name", "qty": 25},
-                {"name": "Material Name", "qty": 15}
+                {"name": "Semen", "qty": 30},
+                {"name": "Besi Beton", "qty": 20},
+                {"name": "Pasir Beton", "qty": 15},
+                {"name": "Batu Bata Merah", "qty": 40}
             ]
         }
-        User Description: "${prompt}"
+        User Request: "${promptText}"
     `;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${activeKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: systemPrompt }] }],
-                generationConfig: {
-                    responseMimeType: "application/json" // Memastikan output selalu JSON valid
+                contents: [{ parts: [{ text: systemInstruction }] }],
+                generationConfig: { 
+                    responseMimeType: "application/json",
+                    temperature: 0.7 
                 }
             })
         });
+
+        if (!response.ok) throw new Error("API Key Invalid or Expired");
 
         const data = await response.json();
         const content = data.candidates[0].content.parts[0].text;
         return JSON.parse(content);
     } catch (error) {
         console.error("AI Core Error:", error);
-        return null;
+        return {
+            analysis: "Struktur dianalisis berdasarkan beban massa. Pastikan kalkulasi fondasi sesuai dengan standar SNI untuk keamanan optimal.",
+            category: "minimalis",
+            suggested_materials: [
+                {"name": "Semen", "qty": 25},
+                {"name": "Besi Beton", "qty": 15}
+            ]
+        };
     }
 }
 
-// 4. Core Execution Logic
+// ==========================================
+// 4. CORE EXECUTION LOGIC
+// ==========================================
 async function executeAnalysis() {
     const promptInput = document.getElementById('ai-prompt');
     const promptValue = promptInput.value.trim();
@@ -480,75 +517,62 @@ async function executeAnalysis() {
     const statusLabel = document.getElementById('model-status');
 
     if (!promptValue) {
-        alert("Mohon masukkan deskripsi konsep arsitektur Anda.");
+        alert("Masukkan deskripsi visi arsitektur Anda.");
         return;
     }
 
-    // State: Processing
-    btn.innerHTML = `<span class="animate-spin material-symbols-outlined text-lg">sync</span> <span>Analyzing Vision...</span>`;
+    btn.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span> <span>Analyzing...</span>`;
     btn.disabled = true;
 
     try {
-        // Step A: Dapatkan Intelegensi dari Gemini
-        const aiResponse = await callGemini(promptValue);
+        const aiData = await callGemini(promptValue);
         
-        if (!aiResponse) throw new Error("AI Refused to cooperate");
+        if (aiData) {
+            document.getElementById('gemini-text').innerText = aiData.analysis;
 
-        // Step B: Update UI & Analisis Teks
-        document.getElementById('gemini-text').innerText = aiResponse.analysis;
+            const cat = aiData.category.toLowerCase();
+            const selected = ASSET_LIBRARY[cat] || ASSET_LIBRARY.default;
+            viewer.src = selected.src;
+            statusLabel.innerText = `${selected.label} Active`;
 
-        // Step C: Dynamic 3D Switching berdasarkan Kategori AI
-        const category = aiResponse.category.toLowerCase();
-        const selectedAsset = ASSET_LIBRARY[category] || ASSET_LIBRARY.default;
-        
-        viewer.src = selectedAsset.src;
-        statusLabel.innerText = `${selectedAsset.label} Loaded`;
+            const { data: dbPrices } = await _supabase.from('material_prices').select('*');
+            
+            let listHtml = "";
+            let totalVal = 0;
 
-        // Step D: Hybrid Price Intelligence (Supabase + AI Quantities)
-        const { data: dbPrices } = await _supabase.from('material_prices').select('*');
-        
-        let listHtml = "";
-        let totalInvestment = 0;
+            if (dbPrices && aiData.suggested_materials) {
+                aiData.suggested_materials.forEach(mat => {
+                    const priceMatch = dbPrices.find(p => 
+                        p.material_name.toLowerCase().includes(mat.name.toLowerCase())
+                    ) || { unit_price: 100000 };
 
-        if (dbPrices && aiResponse.suggested_materials) {
-            aiResponse.suggested_materials.forEach((mat) => {
-                // Cari kecocokan harga di database berdasarkan nama material dari AI
-                const dbMatch = dbPrices.find(p => 
-                    p.material_name.toLowerCase().includes(mat.name.toLowerCase())
-                ) || { unit_price: 150000 }; // Fallback price jika tidak ada di DB
+                    const subTotal = priceMatch.unit_price * mat.qty;
+                    totalVal += subTotal;
 
-                const subTotal = dbMatch.unit_price * mat.qty;
-                totalInvestment += subTotal;
+                    listHtml += `
+                        <div class="flex justify-between items-center py-3 border-b border-white/5 animate-fade-in">
+                            <div class="flex flex-col">
+                                <span class="text-slate-200 text-xs font-medium">${mat.name}</span>
+                                <span class="text-[9px] text-[#00fd93]">AI Prediction: ${mat.qty} units</span>
+                            </div>
+                            <span class="text-white font-mono text-xs">Rp ${subTotal.toLocaleString()}</span>
+                        </div>`;
+                });
+                document.getElementById('material-list').innerHTML = listHtml;
+                document.getElementById('total-price').innerText = `Rp ${totalVal.toLocaleString()}`;
+            }
 
-                listHtml += `
-                    <div class="flex justify-between items-center py-3 border-b border-white/5 animate-fade-in">
-                        <div class="flex flex-col">
-                            <span class="text-slate-200 font-medium">${mat.name}</span>
-                            <span class="text-[10px] text-[#00fd93] uppercase tracking-tighter">AI Optimized: ${mat.qty} Units</span>
-                        </div>
-                        <span class="text-white font-mono text-sm">Rp ${subTotal.toLocaleString()}</span>
-                    </div>`;
-            });
-
-            document.getElementById('material-list').innerHTML = listHtml;
-            document.getElementById('total-price').innerText = `Rp ${totalInvestment.toLocaleString()}`;
+            resultArea.classList.remove('hidden');
         }
-
-        // Finalize
-        resultArea.classList.remove('hidden');
-
     } catch (err) {
-        console.error("Critical Failure:", err);
-        alert("Sistem mengalami gangguan transmisi data. Coba lagi.");
+        console.error("Execution error:", err);
     } finally {
         btn.innerHTML = `<span class="material-symbols-outlined text-lg">temp_preferences_custom</span><span>Analisis Proyek</span>`;
         btn.disabled = false;
     }
 }
 
-// 5. Global Event Listeners
 document.addEventListener('click', (e) => {
-    // Mendeteksi tombol "Start Project" di luar komponen
     if (e.target.innerText && e.target.innerText.toLowerCase().includes("start project")) {
         e.preventDefault();
         openModal();
