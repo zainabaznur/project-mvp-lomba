@@ -693,12 +693,26 @@ viewer.addEventListener('load', () => {
     }
   }
 
-  // Event listener untuk tombol di luar komponen
-  document.addEventListener('click', (e) => {
-    if(e.target.innerText && e.target.innerText.toLowerCase().includes("start project")) {
-      e.preventDefault();
-      openModal();
+// Pastikan ini ditaruh di paling bawah sebelum tutup tag
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM fully loaded and parsed");
+    
+    // Cari semua tombol yang punya teks "Start Project" secara spesifik
+    const startButtons = Array.from(document.querySelectorAll('button, a')).filter(el => 
+        el.textContent.toLowerCase().includes('start project')
+    );
+
+    if (startButtons.length > 0) {
+        startButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log("Tombol Start Project diklik!");
+                openModal();
+            });
+        });
+    } else {
+        console.warn("Tombol 'Start Project' tidak ditemukan di halaman ini.");
     }
-  });
+});
 </script>
 </body></html>
