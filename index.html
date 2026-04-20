@@ -482,7 +482,7 @@
       <div class="w-full md:w-1/2 p-6 md:p-8 border-b md:border-b-0 md:border-r border-white/5">
         <div class="mb-6">
           <h2 class="text-xl font-bold text-white mb-1">Halo, Insinyur</h2>
-          <p class="text-sm text-slate-400 mb-6">Visualisasikan visi arsitektur Anda dalam hitungan detik.</p>
+          <p class="text-sm text-slate-400 mb-6">Visualisasikan visi arsitektur Anda secara instan.</p>
           
           <textarea id="ai-prompt" 
             class="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-sm text-slate-200 outline-none focus:border-[#00fd93]/40 h-32 transition-all resize-none" 
@@ -501,12 +501,12 @@
           </div>
 
           <div>
-            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-3">Rincian Estimasi Material</span>
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-3">Estimasi Material</span>
             <div id="material-list" class="space-y-2"></div>
           </div>
 
           <div class="p-5 bg-[#00fd93]/10 border border-[#00fd93]/20 rounded-2xl">
-            <span class="text-[10px] font-medium text-slate-400 uppercase">Total Proyeksi Investasi</span>
+            <span class="text-[10px] font-medium text-slate-400 uppercase">Proyeksi Investasi</span>
             <div class="text-2xl font-bold text-white mt-1" id="total-price">Rp 0</div>
           </div>
         </div>
@@ -538,25 +538,24 @@
                 <p class="text-xs font-semibold text-white">99.8%</p>
             </div>
             <div class="text-center">
-                <p class="text-[9px] text-slate-500 uppercase">Render Engine</p>
+                <p class="text-[9px] text-slate-500 uppercase">Status</p>
                 <p class="text-xs font-semibold text-[#00fd93]" id="model-status">Aset 1 Ready</p>
             </div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
 
 <script>
-  // 1. Inisialisasi Supabase
+  // 1. Config & Client
   const SUPABASE_URL = 'https://dmjoadaxsbazhuarujoa.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_J7gst2a7Y0UNPo436g041A_Ym1XGuO8';
   const GEMINI_KEY = 'AIzaSyA9-NJYjsKN1t-3txysTCdJFFwtCYJoUfY';
   const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // 2. Mapping Aset GLB (Pastikan file berada di satu folder dengan index.html)
-  const ASSET_MODELS = {
+  // 2. Mapping
+  const ASSET_LIBRARY = {
     'minimalis': './aset1.glb',
     'modern': './aset1.glb',
     'mewah': './aset2.glb',
@@ -572,7 +571,7 @@
   function openModal() { document.getElementById('ai-modal').classList.add('active'); }
   function closeModal() { document.getElementById('ai-modal').classList.remove('active'); }
 
-  // 3. Panggil Gemini AI
+  // 3. AI Function
   async function callGemini(prompt) {
     try {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
@@ -585,11 +584,11 @@
         const json = await response.json();
         return json.candidates[0].content.parts[0].text;
     } catch (e) { 
-        return "Analisis struktur selesai. Pastikan fondasi dan material sesuai dengan standar beban bangunan modern."; 
+        return "Struktur dianalisis. Pastikan material fondasi mendukung beban massa sesuai desain."; 
     }
   }
 
-  // 4. Eksekusi Analisis Utama
+  // 4. Core Logic
   async function executeAnalysis() {
     const promptInput = document.getElementById('ai-prompt');
     const promptValue = promptInput.value.toLowerCase();
@@ -599,77 +598,73 @@
     const statusLabel = document.getElementById('model-status');
     
     if(!promptValue.trim()) {
-        alert("Mohon deskripsikan visi bangunan Anda.");
+        alert("Masukkan deskripsi desain Anda.");
         return;
     }
 
-    btn.innerText = "Menganalisis Proyek...";
+    btn.innerText = "Processing...";
     btn.disabled = true;
 
     try {
-        // --- Langkah A: Update Teks AI ---
+        // A. Gemini AI Call
         const aiText = await callGemini(promptValue);
         document.getElementById('gemini-text').innerText = aiText;
 
-        // --- Langkah B: Ganti Model 3D Berdasarkan Keyword ---
-        let selectedModel = ASSET_MODELS.default;
-        let modelKey = "Aset 1";
+        // B. Dynamic 3D Switch
+        let selectedModel = ASSET_LIBRARY.default;
+        let modelName = "Aset 1";
 
+        // Logic pencarian keyword
         if (promptValue.includes('mewah') || promptValue.includes('villa') || promptValue.includes('luxury')) {
-            selectedModel = ASSET_MODELS.mewah;
-            modelKey = "Aset 2";
+            selectedModel = ASSET_LIBRARY.mewah;
+            modelName = "Aset 2";
         } else if (promptValue.includes('klasik') || promptValue.includes('vintage')) {
-            selectedModel = ASSET_MODELS.klasik;
-            modelKey = "Aset 3";
+            selectedModel = ASSET_LIBRARY.klasik;
+            modelName = "Aset 3";
         } else if (promptValue.includes('industri') || promptValue.includes('kantor')) {
-            selectedModel = ASSET_MODELS.industri;
-            modelKey = "Aset 4";
+            selectedModel = ASSET_LIBRARY.industri;
+            modelName = "Aset 4";
         }
 
         viewer.src = selectedModel;
-        statusLabel.innerText = modelKey + " Loaded";
+        statusLabel.innerText = modelName + " Loaded";
 
-        // --- Langkah C: Hitung Harga Dinamis dari Supabase ---
-        const { data: dbData, error } = await _supabase.from('material_prices').select('*').limit(5);
+        // C. Supabase Dynamic Pricing
+        const { data: dbData } = await _supabase.from('material_prices').select('*').limit(4);
         
-        if (error) throw error;
-
         let listHtml = "";
-        let totalEstimasi = 0;
+        let totalVal = 0;
 
         if (dbData) {
             dbData.forEach(item => {
-                // Variasi volume (acak 20-100) agar output tidak statis
-                const qty = Math.floor(Math.random() * 80) + 20;
+                const qty = Math.floor(Math.random() * 41) + 10; // Random quantity 10-50
                 const subTotal = item.unit_price * qty;
-                totalEstimasi += subTotal;
+                totalVal += subTotal;
 
                 listHtml += `
                 <div class="flex justify-between items-center py-2 border-b border-white/5 text-[11px] animate-fade-in">
                     <div class="flex flex-col">
-                        <span class="text-slate-200 font-medium">${item.material_name}</span>
-                        <span class="text-[9px] text-slate-500">Kuantitas: ~${qty} unit/m²</span>
+                        <span class="text-slate-300">${item.material_name}</span>
+                        <span class="text-[9px] text-slate-500">Estimasi volume: ${qty}</span>
                     </div>
-                    <span class="text-[#00fd93]">Rp ${subTotal.toLocaleString()}</span>
+                    <span class="text-white font-medium">Rp ${subTotal.toLocaleString()}</span>
                 </div>`;
             });
             document.getElementById('material-list').innerHTML = listHtml;
-            document.getElementById('total-price').innerText = `Rp ${totalEstimasi.toLocaleString()}`;
+            document.getElementById('total-price').innerText = `Rp ${totalVal.toLocaleString()}`;
         }
 
-        // Tampilkan hasil
         resultArea.classList.remove('hidden');
 
     } catch (err) {
-        console.error("Gagal memproses data:", err);
-        alert("Koneksi Supabase bermasalah atau file GLB tidak ditemukan.");
+        console.error("Error:", err);
     } finally {
         btn.innerHTML = `<span class="material-symbols-outlined text-lg">temp_preferences_custom</span><span>Analisis Proyek</span>`;
         btn.disabled = false;
     }
   }
 
-  // Listener untuk membuka modal dari tombol "Start Project" di luar script ini
+  // Event listener untuk tombol di luar komponen
   document.addEventListener('click', (e) => {
     if(e.target.innerText && e.target.innerText.toLowerCase().includes("start project")) {
       e.preventDefault();
