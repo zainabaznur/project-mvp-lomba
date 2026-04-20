@@ -406,77 +406,139 @@
 </div>
 </div>
 </footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
-
 <script>
-const GEMINI_API_KEY = "AIzaSyD7RWq9I67z1Isuk6KinQ6v7PUmYkrQuXY"; // Key kamu
+  // 1. Config & Client
+  const SUPABASE_URL = 'https://dmjoadaxsbazhuarujoa.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_J7gst2a7Y0UNPo436g041A_Ym1XGuO8';
+  const GEMINI_KEY = 'AIzaSyA9-NJYjsKN1t-3txysTCdJFFwtCYJoUfY';
+  const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Sesuaikan nama file persis dengan yang ada di folder kamu
-const ASSET_LIBRARY = {
-    'minimalis': 'aset1.glb',
-    'mewah': 'aset2.glb',
-    'klasik': 'aset3.glb',
-    'industri': 'aset4.glb',
-    'default': 'aset1.glb'
-};
+  // 2. Mapping
+  const ASSET_LIBRARY = {
+    'minimalis': './aset1.glb',
+    'modern': './aset1.glb',
+    'mewah': './aset2.glb',
+    'luxury': './aset2.glb',
+    'villa': './aset2.glb',
+    'klasik': './aset3.glb',
+    'vintage': './aset3.glb',
+    'industri': './aset4.glb',
+    'kantor': './aset4.glb',
+    'default': './aset1.glb'
+  };
 
-async function callGemini(promptText) {
-    // Gunakan URL yang sudah pasti benar
-    const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+  // Fungsi Modal (Global agar bisa dipanggil onclick langsung jika perlu)
+  window.openModal = function() { 
+    const modal = document.getElementById('ai-modal');
+    if(modal) modal.classList.add('active'); 
+  };
+  
+  window.closeModal = function() { 
+    const modal = document.getElementById('ai-modal');
+    if(modal) modal.classList.remove('active'); 
+  };
 
+  // 3. AI Function
+  async function callGemini(prompt) {
     try {
-        const response = await fetch(URL, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                contents: [{ parts: [{ text: `Analisis konsep arsitektur: "${promptText}". Berikan JSON: {"analysis": "Saran teknis 2 kalimat", "category": "minimalis|mewah|klasik|industri"}` }]}],
-                generationConfig: { responseMimeType: "application/json" }
+                contents: [{ parts: [{ text: `Berperanlah sebagai AI Arsitek Profesional. Berdasarkan deskripsi: "${prompt}", berikan saran teknis struktur dalam 2 kalimat singkat.` }]}]
             })
         });
-
-        const data = await response.json();
-        return JSON.parse(data.candidates[0].content.parts[0].text);
-    } catch (error) {
-        console.error("Gemini Error:", error);
-        return { analysis: "Struktur dianalisis berdasarkan beban massa.", category: "minimalis" };
+        const json = await response.json();
+        return json.candidates[0].content.parts[0].text;
+    } catch (e) { 
+        return "Struktur dianalisis. Pastikan material fondasi mendukung beban massa sesuai desain."; 
     }
-}
+  }
 
-async function executeAnalysis() {
+  // 4. Core Logic
+  async function executeAnalysis() {
     const promptInput = document.getElementById('ai-prompt');
-    const promptValue = promptInput.value.trim();
+    const promptValue = promptInput.value.toLowerCase();
     const btn = document.getElementById('run-ai');
     const viewer = document.getElementById('ai-3d-model');
     const resultArea = document.getElementById('ai-result-area');
+    const statusLabel = document.getElementById('model-status');
+    
+    if(!promptValue.trim()) {
+        alert("Masukkan deskripsi desain Anda.");
+        return;
+    }
 
-    if (!promptValue) return alert("Isi deskripsi dulu!");
-
-    btn.innerText = "Analyzing...";
+    btn.innerText = "Processing...";
     btn.disabled = true;
 
     try {
-        const aiData = await callGemini(promptValue);
-        document.getElementById('gemini-text').innerText = aiData.analysis;
+        const aiText = await callGemini(promptValue);
+        document.getElementById('gemini-text').innerText = aiText;
 
-        // GANTI MODEL
-        const cat = aiData.category.toLowerCase();
-        const fileName = ASSET_LIBRARY[cat] || ASSET_LIBRARY.default;
+        let selectedModel = ASSET_LIBRARY.default;
+        let modelName = "Aset 1";
+
+        if (promptValue.includes('mewah') || promptValue.includes('villa') || promptValue.includes('luxury')) {
+            selectedModel = ASSET_LIBRARY.mewah;
+            modelName = "Aset 2";
+        } else if (promptValue.includes('klasik') || promptValue.includes('vintage')) {
+            selectedModel = ASSET_LIBRARY.klasik;
+            modelName = "Aset 3";
+        } else if (promptValue.includes('industri') || promptValue.includes('kantor')) {
+            selectedModel = ASSET_LIBRARY.industri;
+            modelName = "Aset 4";
+        }
+
+        viewer.src = selectedModel;
+        statusLabel.innerText = modelName + " Loaded";
+
+        const { data: dbData } = await _supabase.from('material_prices').select('*').limit(4);
         
-        // Coba ganti src model
-        viewer.src = fileName; 
-        document.getElementById('model-status').innerText = cat.toUpperCase() + " Mode Active";
+        let listHtml = "";
+        let totalVal = 0;
+
+        if (dbData) {
+            dbData.forEach(item => {
+                const qty = Math.floor(Math.random() * 41) + 10;
+                const subTotal = item.unit_price * qty;
+                totalVal += subTotal;
+
+                listHtml += `
+                <div class="flex justify-between items-center py-2 border-b border-white/5 text-[11px] animate-fade-in">
+                    <div class="flex flex-col">
+                        <span class="text-slate-300">${item.material_name}</span>
+                        <span class="text-[9px] text-slate-500">Estimasi volume: ${qty}</span>
+                    </div>
+                    <span class="text-white font-medium">Rp ${subTotal.toLocaleString()}</span>
+                </div>`;
+            });
+            document.getElementById('material-list').innerHTML = listHtml;
+            document.getElementById('total-price').innerText = `Rp ${totalVal.toLocaleString()}`;
+        }
 
         resultArea.classList.remove('hidden');
+
     } catch (err) {
-        console.error("System Error:", err);
+        console.error("Error:", err);
     } finally {
-        btn.innerText = "Analisis Proyek";
+        btn.innerHTML = `<span class="material-symbols-outlined text-lg">temp_preferences_custom</span><span>Analisis Proyek</span>`;
         btn.disabled = false;
     }
-}
+  }
 
-function openModal() { document.getElementById('ai-modal').classList.add('active'); }
-function closeModal() { document.getElementById('ai-modal').classList.remove('active'); }
+  // FIX: Listener yang lebih akurat
+  document.addEventListener('click', (e) => {
+    // Mencari elemen button atau link terdekat yang diklik
+    const target = e.target.closest('button, a');
+    if (!target) return;
+
+    const text = target.innerText.toLowerCase().trim();
+    // Cek apakah teks mengandung "start project" atau "start projek"
+    if (text.includes("start project") || text.includes("start projek")) {
+      e.preventDefault();
+      openModal();
+    }
+  });
 </script>
 </body></html>
