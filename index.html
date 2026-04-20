@@ -407,15 +407,13 @@
 </div>
 </footer>
 <script>
-  // 1. Konfigurasi Client
+  // 1. Variabel Global
   const SUPABASE_URL = 'https://dmjoadaxsbazhuarujoa.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_J7gst2a7Y0UNPo436g041A_Ym1XGuO8';
   const GEMINI_KEY = 'AIzaSyA9-NJYjsKN1t-3txysTCdJFFwtCYJoUfY';
-  
-  // Gunakan versi v1 agar lebih stabil dibanding v1beta
   const GEMINI_API = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
 
-  const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  let _supabase = null;
 
   const ASSET_LIBRARY = {
     'mewah': 'aset2.glb', 'villa': 'aset2.glb',
@@ -424,7 +422,7 @@
     'default': 'aset1.glb'
   };
 
-  // 2. Fungsi Modal (Dibuat Global agar bisa dipanggil onclick)
+  // 2. Fungsi Modal (Pakai Inline Style agar pasti jalan)
   window.openModal = function() {
     const modal = document.getElementById('ai-modal');
     if(modal) {
@@ -441,96 +439,87 @@
     }
   };
 
-  // 3. Fungsi AI Gemini
-  async function callGemini(prompt) {
-    try {
-      const response = await fetch(GEMINI_API, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: `Kamu Insinyur Sipil Senior. Berikan 2 kalimat analisis teknis singkat untuk: "${prompt}". Langsung ke poin teknis.` }]}]
-        })
-      });
-      const json = await response.json();
-      return json.candidates?.[0]?.content?.parts?.[0]?.text || "Analisis teknis: Fokus pada perkuatan struktur utama.";
-    } catch (e) {
-      console.error("Gemini Error:", e);
-      return "Rekomendasi teknis: Gunakan pondasi sesuai daya dukung tanah dan material tahan cuaca.";
+  // 3. Inisialisasi Aman
+  function initSupabase() {
+    if (typeof supabase !== 'undefined') {
+      _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      console.log("Supabase initialized!");
+    } else {
+      console.warn("Retrying Supabase init...");
+      setTimeout(initSupabase, 500); // Coba lagi tiap 0.5 detik jika gagal load CDN
     }
   }
 
   // 4. Eksekusi Analisis
   window.executeAnalysis = async function() {
+    if (!_supabase) {
+      alert("Sistem sedang inisialisasi, mohon tunggu sebentar.");
+      initSupabase();
+      return;
+    }
+
     const promptInput = document.getElementById('ai-prompt');
     const btn = document.getElementById('run-ai');
     const viewer = document.getElementById('ai-3d-model');
-    const statusLabel = document.getElementById('model-status');
     const promptValue = promptInput.value.toLowerCase();
 
-    if(!promptValue.trim()) return alert("Masukkan deskripsi desain Anda.");
+    if(!promptValue.trim()) return alert("Masukkan deskripsi desain.");
 
-    btn.innerText = "Analysing System...";
+    btn.innerText = "Analysing...";
     btn.disabled = true;
 
     try {
-      // Panggil Gemini
-      const aiText = await callGemini(promptValue);
-      document.getElementById('gemini-text').innerText = aiText;
+      // Gemini Call
+      const geminiResp = await fetch(GEMINI_API, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ contents: [{ parts: [{ text: `Analisis teknis singkat: "${promptValue}". Max 2 kalimat.` }]}] })
+      });
+      const geminiJson = await geminiResp.json();
+      document.getElementById('gemini-text').innerText = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text || "Analisis selesai.";
 
-      // Logika Ganti Model
-      let selectedModel = ASSET_LIBRARY.default;
-      if (promptValue.match(/mewah|villa|luxury/)) selectedModel = ASSET_LIBRARY.mewah;
-      else if (promptValue.match(/klasik|vintage/)) selectedModel = ASSET_LIBRARY.klasik;
-      else if (promptValue.match(/industri|kantor/)) selectedModel = ASSET_LIBRARY.industri;
+      // Update Model
+      let model = ASSET_LIBRARY.default;
+      if (promptValue.match(/mewah|villa/)) model = ASSET_LIBRARY.mewah;
+      else if (promptValue.match(/klasik/)) model = ASSET_LIBRARY.klasik;
+      else if (promptValue.match(/industri|kantor/)) model = ASSET_LIBRARY.industri;
+      
+      viewer.src = model;
+      document.getElementById('model-status').innerText = model + " Loaded";
 
-      // Update Viewer secara aman
-      statusLabel.innerText = "Loading 3D Asset...";
-      viewer.src = selectedModel;
-
-      // Supabase Data
+      // Supabase Pricing
       const { data: dbData } = await _supabase.from('material_prices').select('*').limit(4);
-      let listHtml = "";
-      let totalVal = 0;
-
       if (dbData) {
+        let listHtml = "";
+        let total = 0;
         dbData.forEach(item => {
-          const qty = Math.floor(Math.random() * 41) + 10;
-          const subTotal = item.unit_price * qty;
-          totalVal += subTotal;
-          listHtml += `
-            <div class="flex justify-between items-center py-2 border-b border-white/5 text-[11px]">
-              <div class="flex flex-col">
-                <span class="text-slate-300">${item.material_name}</span>
-                <span class="text-[9px] text-slate-500">Vol: ~${qty}</span>
-              </div>
-              <span class="text-[#00fd93] font-medium">Rp ${subTotal.toLocaleString()}</span>
-            </div>`;
+          const qty = Math.floor(Math.random() * 30) + 10;
+          const sub = item.unit_price * qty;
+          total += sub;
+          listHtml += `<div class="flex justify-between border-b border-white/5 py-1"><span>${item.material_name}</span><span class="text-[#00fd93]">Rp ${sub.toLocaleString()}</span></div>`;
         });
         document.getElementById('material-list').innerHTML = listHtml;
-        document.getElementById('total-price').innerText = `Rp ${totalVal.toLocaleString()}`;
+        document.getElementById('total-price').innerText = `Rp ${total.toLocaleString()}`;
       }
-
       document.getElementById('ai-result-area').classList.remove('hidden');
-      statusLabel.innerText = "Ready";
-
-    } catch (err) {
-      console.error("Execution Error:", err);
+    } catch (e) {
+      console.error(e);
     } finally {
-      btn.innerHTML = `<span class="material-symbols-outlined text-lg">temp_preferences_custom</span><span>Analisis Proyek</span>`;
+      btn.innerText = "Analisis Proyek";
       btn.disabled = false;
     }
   };
 
-  // 5. Inisialisasi Event Listener
-  document.addEventListener('DOMContentLoaded', () => {
-    // Force listener untuk semua tombol yang mengandung teks "Start Project"
-    document.body.addEventListener('click', (e) => {
-      const btn = e.target.closest('button, a');
-      if (btn && btn.innerText.toLowerCase().includes("start project")) {
-        e.preventDefault();
-        window.openModal();
-      }
-    });
+  // 5. Global Click Listener (Solusi Tombol Start Project)
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('button, a');
+    if (target && target.innerText.toLowerCase().includes("start project")) {
+      e.preventDefault();
+      window.openModal();
+    }
   });
+
+  // Jalankan init
+  initSupabase();
 </script>
 </body></html>
