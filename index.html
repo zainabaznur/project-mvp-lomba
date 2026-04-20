@@ -406,182 +406,129 @@
 </div>
 </div>
 </footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
-
-<style>
-  #ai-modal { display: none; opacity: 0; transition: opacity 0.3s ease; }
-  #ai-modal.active { display: flex; opacity: 1; }
-  .modal-content { max-height: 90vh; width: 95%; max-width: 1100px; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-  .custom-scroll::-webkit-scrollbar { width: 4px; }
-  .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0, 253, 147, 0.3); border-radius: 10px; }
-  .glass-effect { background: rgba(13, 17, 23, 0.98); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
-  .btn-primary-meta { background: #00fd93; color: #0b0e11; font-weight: 600; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-  .btn-primary-meta:hover:not(:disabled) { background: #00ed89; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 253, 147, 0.25); }
-  .btn-primary-meta:disabled { opacity: 0.6; cursor: not-allowed; }
-  #ai-3d-model { width: 100%; height: 300px; outline: none; background: radial-gradient(circle, #1a1f26 0%, #0d1117 100%); }
-  @media (min-width: 768px) { #ai-3d-model { height: 500px; } }
-  .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-</style>
-
-<div id="ai-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-2 md:p-4">
-  <div class="modal-content glass-effect rounded-[2rem] overflow-hidden flex flex-col">
-    <div class="p-5 border-b border-white/5 flex justify-between items-center">
-      <div class="flex items-center gap-3">
-        <div class="h-2 w-2 rounded-full bg-[#00fd93] shadow-[0_0_10px_#00fd93]"></div>
-        <h3 class="text-[10px] md:text-sm font-medium tracking-widest text-slate-400 uppercase">Archiscan Intelligence System</h3>
-      </div>
-      <button onclick="closeModal()" class="text-slate-500 hover:text-white transition-all p-2">
-        <span class="material-symbols-outlined text-xl">close</span>
-      </button>
-    </div>
-
-    <div class="flex flex-col md:flex-row overflow-y-auto custom-scroll">
-      <div class="w-full md:w-1/2 p-6 md:p-8 border-b md:border-b-0 md:border-r border-white/5">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold text-white mb-1">Halo, Insinyur</h2>
-          <p class="text-sm text-slate-400 mb-6">Analisis teknis dan visualisasi arsitektur instan.</p>
-          <textarea id="ai-prompt" class="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-sm text-slate-200 outline-none focus:border-[#00fd93]/40 h-32 transition-all resize-none" placeholder="Contoh: Villa mewah 2 lantai di lahan miring..."></textarea>
-        </div>
-        <button id="run-ai" onclick="executeAnalysis()" class="btn-primary-meta w-full py-4 rounded-xl flex items-center justify-center gap-2 mb-8">
-          <span class="material-symbols-outlined text-lg">temp_preferences_custom</span>
-          <span>Analisis Proyek</span>
-        </button>
-        <div id="ai-result-area" class="hidden space-y-6 animate-fade-in pb-4">
-          <div class="bg-white/5 p-4 rounded-xl border border-white/5">
-            <span class="text-[10px] font-bold text-[#00fd93] uppercase tracking-widest block mb-2">Saran Struktur Profesional</span>
-            <div id="gemini-text" class="text-xs md:text-sm text-slate-300 leading-relaxed italic"></div>
-          </div>
-          <div>
-            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-3">Estimasi Material</span>
-            <div id="material-list" class="space-y-2"></div>
-          </div>
-          <div class="p-5 bg-[#00fd93]/10 border border-[#00fd93]/20 rounded-2xl">
-            <span class="text-[10px] font-medium text-slate-400 uppercase">Proyeksi Investasi</span>
-            <div class="text-2xl font-bold text-white mt-1" id="total-price">Rp 0</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="w-full md:w-1/2 bg-black/20 p-6 md:p-8 flex flex-col items-center justify-center relative min-h-[350px]">
-        <div class="absolute top-6 left-6 flex items-center gap-2">
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00fd93] opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-[#00fd93]"></span>
-            </span>
-            <span class="text-[10px] font-mono text-slate-500 uppercase">3D_LIVE_RENDER</span>
-        </div>
-        <model-viewer id="ai-3d-model" src="aset1.glb" auto-rotate camera-controls shadow-intensity="1" environment-image="neutral" loading="eager" bounds="tight"></model-viewer>
-        <div class="mt-6 flex gap-6 border-t border-white/5 pt-6 w-full justify-center">
-            <div class="text-center">
-                <p class="text-[9px] text-slate-500 uppercase">Analysis Precision</p>
-                <p class="text-xs font-semibold text-white">99.8%</p>
-            </div>
-            <div class="text-center">
-                <p class="text-[9px] text-slate-500 uppercase">Status</p>
-                <p class="text-xs font-semibold text-[#00fd93]" id="model-status">Aset 1 Ready</p>
-            </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
+  // 1. Konfigurasi Client
   const SUPABASE_URL = 'https://dmjoadaxsbazhuarujoa.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_J7gst2a7Y0UNPo436g041A_Ym1XGuO8';
   const GEMINI_KEY = 'AIzaSyA9-NJYjsKN1t-3txysTCdJFFwtCYJoUfY';
+  
+  // Gunakan versi v1 agar lebih stabil dibanding v1beta
+  const GEMINI_API = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
+
   const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const ASSET_LIBRARY = {
-    'minimalis': 'aset1.glb', 'modern': 'aset1.glb',
-    'mewah': 'aset2.glb', 'luxury': 'aset2.glb', 'villa': 'aset2.glb',
+    'mewah': 'aset2.glb', 'villa': 'aset2.glb',
     'klasik': 'aset3.glb', 'vintage': 'aset3.glb',
     'industri': 'aset4.glb', 'kantor': 'aset4.glb',
     'default': 'aset1.glb'
   };
 
-  function openModal() { document.getElementById('ai-modal').classList.add('active'); }
-  function closeModal() { document.getElementById('ai-modal').classList.remove('active'); }
+  // 2. Fungsi Modal (Dibuat Global agar bisa dipanggil onclick)
+  window.openModal = function() {
+    const modal = document.getElementById('ai-modal');
+    if(modal) {
+      modal.style.display = 'flex';
+      setTimeout(() => modal.classList.add('active'), 10);
+    }
+  };
 
+  window.closeModal = function() {
+    const modal = document.getElementById('ai-modal');
+    if(modal) {
+      modal.classList.remove('active');
+      setTimeout(() => modal.style.display = 'none', 300);
+    }
+  };
+
+  // 3. Fungsi AI Gemini
   async function callGemini(prompt) {
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: `Kamu Insinyur Sipil Senior. Berikan 2 kalimat analisis teknis spesifik (seperti pondasi, kolom, material) untuk: "${prompt}". Langsung ke inti teknis, tanpa salam.` }]}]
-            })
-        });
-        const json = await response.json();
-        if (json.candidates && json.candidates[0].content) {
-            return json.candidates[0].content.parts[0].text;
-        }
-        throw new Error("Invalid Response");
+      const response = await fetch(GEMINI_API, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `Kamu Insinyur Sipil Senior. Berikan 2 kalimat analisis teknis singkat untuk: "${prompt}". Langsung ke poin teknis.` }]}]
+        })
+      });
+      const json = await response.json();
+      return json.candidates?.[0]?.content?.parts?.[0]?.text || "Analisis teknis: Fokus pada perkuatan struktur utama.";
     } catch (e) {
-        return "Rekomendasi teknis: Gunakan penguatan struktur pada titik beban utama dan material tahan cuaca untuk durabilitas.";
+      console.error("Gemini Error:", e);
+      return "Rekomendasi teknis: Gunakan pondasi sesuai daya dukung tanah dan material tahan cuaca.";
     }
   }
 
-  async function executeAnalysis() {
+  // 4. Eksekusi Analisis
+  window.executeAnalysis = async function() {
     const promptInput = document.getElementById('ai-prompt');
-    const promptValue = promptInput.value.toLowerCase();
     const btn = document.getElementById('run-ai');
     const viewer = document.getElementById('ai-3d-model');
-    const resultArea = document.getElementById('ai-result-area');
     const statusLabel = document.getElementById('model-status');
-    
+    const promptValue = promptInput.value.toLowerCase();
+
     if(!promptValue.trim()) return alert("Masukkan deskripsi desain Anda.");
 
-    btn.innerText = "Analysing...";
+    btn.innerText = "Analysing System...";
     btn.disabled = true;
 
     try {
-        const aiText = await callGemini(promptValue);
-        document.getElementById('gemini-text').innerText = aiText;
+      // Panggil Gemini
+      const aiText = await callGemini(promptValue);
+      document.getElementById('gemini-text').innerText = aiText;
 
-        let selectedModel = ASSET_LIBRARY.default;
-        let modelName = "Aset 1";
+      // Logika Ganti Model
+      let selectedModel = ASSET_LIBRARY.default;
+      if (promptValue.match(/mewah|villa|luxury/)) selectedModel = ASSET_LIBRARY.mewah;
+      else if (promptValue.match(/klasik|vintage/)) selectedModel = ASSET_LIBRARY.klasik;
+      else if (promptValue.match(/industri|kantor/)) selectedModel = ASSET_LIBRARY.industri;
 
-        if (promptValue.match(/mewah|villa|luxury/)) { selectedModel = ASSET_LIBRARY.mewah; modelName = "Aset 2"; }
-        else if (promptValue.match(/klasik|vintage/)) { selectedModel = ASSET_LIBRARY.klasik; modelName = "Aset 3"; }
-        else if (promptValue.match(/industri|kantor/)) { selectedModel = ASSET_LIBRARY.industri; modelName = "Aset 4"; }
+      // Update Viewer secara aman
+      statusLabel.innerText = "Loading 3D Asset...";
+      viewer.src = selectedModel;
 
-        // Mencegah Error 404: Pastikan nama file di GitHub sama persis (Case Sensitive)
-        viewer.src = selectedModel;
-        statusLabel.innerText = modelName + " Rendering...";
+      // Supabase Data
+      const { data: dbData } = await _supabase.from('material_prices').select('*').limit(4);
+      let listHtml = "";
+      let totalVal = 0;
 
-        const { data: dbData } = await _supabase.from('material_prices').select('*').limit(4);
-        let listHtml = "";
-        let totalVal = 0;
+      if (dbData) {
+        dbData.forEach(item => {
+          const qty = Math.floor(Math.random() * 41) + 10;
+          const subTotal = item.unit_price * qty;
+          totalVal += subTotal;
+          listHtml += `
+            <div class="flex justify-between items-center py-2 border-b border-white/5 text-[11px]">
+              <div class="flex flex-col">
+                <span class="text-slate-300">${item.material_name}</span>
+                <span class="text-[9px] text-slate-500">Vol: ~${qty}</span>
+              </div>
+              <span class="text-[#00fd93] font-medium">Rp ${subTotal.toLocaleString()}</span>
+            </div>`;
+        });
+        document.getElementById('material-list').innerHTML = listHtml;
+        document.getElementById('total-price').innerText = `Rp ${totalVal.toLocaleString()}`;
+      }
 
-        if (dbData) {
-            dbData.forEach(item => {
-                const qty = Math.floor(Math.random() * 41) + 10;
-                const subTotal = item.unit_price * qty;
-                totalVal += subTotal;
-                listHtml += `<div class="flex justify-between items-center py-2 border-b border-white/5 text-[11px] animate-fade-in"><div class="flex flex-col"><span class="text-slate-300">${item.material_name}</span><span class="text-[9px] text-slate-500">Vol: ~${qty}</span></div><span class="text-[#00fd93] font-medium">Rp ${subTotal.toLocaleString()}</span></div>`;
-            });
-            document.getElementById('material-list').innerHTML = listHtml;
-            document.getElementById('total-price').innerText = `Rp ${totalVal.toLocaleString()}`;
-        }
-        resultArea.classList.remove('hidden');
-        statusLabel.innerText = modelName + " Ready";
+      document.getElementById('ai-result-area').classList.remove('hidden');
+      statusLabel.innerText = "Ready";
+
     } catch (err) {
-        console.error(err);
+      console.error("Execution Error:", err);
     } finally {
-        btn.innerHTML = `<span class="material-symbols-outlined text-lg">temp_preferences_custom</span><span>Analisis Proyek</span>`;
-        btn.disabled = false;
+      btn.innerHTML = `<span class="material-symbols-outlined text-lg">temp_preferences_custom</span><span>Analisis Proyek</span>`;
+      btn.disabled = false;
     }
-  }
+  };
 
+  // 5. Inisialisasi Event Listener
   document.addEventListener('DOMContentLoaded', () => {
-    document.addEventListener('click', (e) => {
-      const target = e.target.closest('button, a');
-      if (target && target.innerText?.toLowerCase().includes("start project")) {
-          e.preventDefault();
-          openModal();
+    // Force listener untuk semua tombol yang mengandung teks "Start Project"
+    document.body.addEventListener('click', (e) => {
+      const btn = e.target.closest('button, a');
+      if (btn && btn.innerText.toLowerCase().includes("start project")) {
+        e.preventDefault();
+        window.openModal();
       }
     });
   });
