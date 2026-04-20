@@ -413,15 +413,13 @@
   const GEMINI_KEY = 'AIzaSyA9-NJYjsKN1t-3txysTCdJFFwtCYJoUfY';
   const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // FUNGSI MODAL (Dibuat Global agar bisa dipanggil onclick)
+  // FUNGSI MODAL (Hanya memanipulasi elemen, tidak ubah file CSS)
   window.openModal = function() { 
     const modal = document.getElementById('ai-modal');
     if (modal) {
-        modal.style.setProperty('display', 'flex', 'important'); // Paksa display flex
+        // Kita ubah display-nya lewat JS supaya CSS asli kamu aman
+        modal.style.display = 'flex'; 
         setTimeout(() => modal.classList.add('active'), 10);
-        console.log("Modal dibuka!"); // Cek di F12 Console
-    } else {
-        console.error("Elemen ai-modal tidak ditemukan!");
     }
   };
 
@@ -433,7 +431,7 @@
     }
   };
 
-  // CORE ANALYSIS
+  // FUNGSI ANALISIS (Logika Aset .glb Zainab)
   async function executeAnalysis() {
     const promptInput = document.getElementById('ai-prompt');
     const btn = document.getElementById('run-ai');
@@ -441,7 +439,7 @@
     
     if(!promptInput.value.trim()) return alert("Masukkan deskripsi proyek!");
 
-    btn.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span><span>Menganalisis...</span>`;
+    btn.innerText = "Menganalisis...";
     btn.disabled = true;
 
     try {
@@ -449,28 +447,28 @@
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                contents: [{ parts: [{ text: `Berikan JSON murni tanpa markdown: {"analisis": "saran teknis singkat", "estimasi_luas_m2": angka} untuk deskripsi: "${promptInput.value}"` }]}]
+                contents: [{ parts: [{ text: `Berikan JSON murni: {"analisis": "saran teknis", "luas": angka} untuk: "${promptInput.value}"` }]}]
             })
         });
         
         const jsonResp = await response.json();
-        const rawText = jsonResp.candidates[0].content.parts[0].text;
-        const aiData = JSON.parse(rawText.match(/\{.*\}/s)[0]);
+        const aiData = JSON.parse(jsonResp.candidates[0].content.parts[0].text.match(/\{.*\}/s)[0]);
 
+        // Ambil data material dari Supabase
         const { data: dbData } = await _supabase.from('material_prices').select('*');
 
-        let totalInvestasi = 0;
+        let total = 0;
         let listHtml = "";
-        const luas = aiData.estimasi_luas_m2 || 60;
+        const luas = aiData.luas || 50;
 
         if (dbData) {
             dbData.forEach(item => {
-                const vol = (luas * (Math.random() * 0.2 + 0.1)).toFixed(1);
+                const vol = (luas * 0.15).toFixed(1);
                 const sub = Math.round(item.unit_price * vol);
-                totalInvestasi += sub;
+                total += sub;
                 listHtml += `<div class="flex justify-between py-2 border-b border-white/5 text-[11px]">
-                    <span class="text-slate-400">${item.material_name} (${vol})</span>
-                    <span class="text-white font-medium">Rp ${sub.toLocaleString()}</span>
+                    <span>${item.material_name} (${vol})</span>
+                    <span>Rp ${sub.toLocaleString()}</span>
                 </div>`;
             });
         }
@@ -478,9 +476,9 @@
         document.getElementById('ai-result-area').classList.remove('hidden');
         document.getElementById('gemini-text').innerText = aiData.analisis;
         document.getElementById('material-list').innerHTML = listHtml;
-        document.getElementById('total-price').innerText = `Rp ${totalInvestasi.toLocaleString()}`;
+        document.getElementById('total-price').innerText = `Rp ${total.toLocaleString()}`;
 
-        // 3D Switch
+        // SWITCH MODEL 3D (Aset lokal Zainab)
         const low = promptInput.value.toLowerCase();
         if (low.includes("rumah")) viewer.src = "aset1.glb";
         else if (low.includes("villa")) viewer.src = "aset2.glb";
@@ -491,12 +489,12 @@
     } catch (err) {
         alert("Gagal menganalisis.");
     } finally {
-        btn.innerHTML = `<span class="material-symbols-outlined">temp_preferences_custom</span><span>Analisis Proyek</span>`;
+        btn.innerText = "Analisis Proyek";
         btn.disabled = false;
     }
   }
 
-  // Close modal saat klik area luar
+  // Tutup modal saat klik luar area modal
   window.onclick = function(event) {
     const modal = document.getElementById('ai-modal');
     if (event.target == modal) closeModal();
