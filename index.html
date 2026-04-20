@@ -407,39 +407,41 @@
 </div>
 </footer>
 <script>
-  // 1. CONFIGURATION & DATABASE
+  // CONFIG & DATABASE
   const SUPABASE_URL = 'https://dmjoadaxsbazhuarujoa.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_J7gst2a7Y0UNPo436g041A_Ym1XGuO8';
   const GEMINI_KEY = 'AIzaSyA9-NJYjsKN1t-3txysTCdJFFwtCYJoUfY';
   const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // 2. MODAL FUNCTIONS (Force Display)
-  function openModal() { 
+  // FUNGSI MODAL (Dibuat Global agar bisa dipanggil onclick)
+  window.openModal = function() { 
     const modal = document.getElementById('ai-modal');
     if (modal) {
-        modal.style.display = 'flex'; 
+        modal.style.setProperty('display', 'flex', 'important'); // Paksa display flex
         setTimeout(() => modal.classList.add('active'), 10);
+        console.log("Modal dibuka!"); // Cek di F12 Console
+    } else {
+        console.error("Elemen ai-modal tidak ditemukan!");
     }
-  }
+  };
 
-  function closeModal() { 
+  window.closeModal = function() { 
     const modal = document.getElementById('ai-modal');
     if (modal) {
         modal.classList.remove('active');
         setTimeout(() => modal.style.display = 'none', 300);
     }
-  }
+  };
 
-  // 3. CORE ANALYSIS LOGIC
+  // CORE ANALYSIS
   async function executeAnalysis() {
     const promptInput = document.getElementById('ai-prompt');
-    const promptValue = promptInput.value;
     const btn = document.getElementById('run-ai');
     const viewer = document.getElementById('ai-3d-model');
     
-    if(!promptValue.trim()) return alert("Halo Insinyur, masukkan deskripsi proyek!");
+    if(!promptInput.value.trim()) return alert("Masukkan deskripsi proyek!");
 
-    btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-lg">sync</span><span>Menganalisis...</span>`;
+    btn.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span><span>Menganalisis...</span>`;
     btn.disabled = true;
 
     try {
@@ -447,7 +449,7 @@
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                contents: [{ parts: [{ text: `Analisis deskripsi: "${promptValue}". Berikan jawaban JSON murni: {"analisis": "saran teknis 2 kalimat", "estimasi_luas_m2": angka}.` }]}]
+                contents: [{ parts: [{ text: `Berikan JSON murni tanpa markdown: {"analisis": "saran teknis singkat", "estimasi_luas_m2": angka} untuk deskripsi: "${promptInput.value}"` }]}]
             })
         });
         
@@ -463,14 +465,13 @@
 
         if (dbData) {
             dbData.forEach(item => {
-                const volume = (luas * (Math.random() * 0.3 + 0.1)).toFixed(1);
-                const subTotal = Math.round(item.unit_price * volume);
-                totalInvestasi += subTotal;
-                listHtml += `
-                    <div class="flex justify-between items-center py-2 border-b border-white/5 text-[11px]">
-                        <span class="text-slate-400">${item.material_name} (Vol: ${volume})</span>
-                        <span class="text-white font-medium">Rp ${subTotal.toLocaleString()}</span>
-                    </div>`;
+                const vol = (luas * (Math.random() * 0.2 + 0.1)).toFixed(1);
+                const sub = Math.round(item.unit_price * vol);
+                totalInvestasi += sub;
+                listHtml += `<div class="flex justify-between py-2 border-b border-white/5 text-[11px]">
+                    <span class="text-slate-400">${item.material_name} (${vol})</span>
+                    <span class="text-white font-medium">Rp ${sub.toLocaleString()}</span>
+                </div>`;
             });
         }
 
@@ -479,49 +480,26 @@
         document.getElementById('material-list').innerHTML = listHtml;
         document.getElementById('total-price').innerText = `Rp ${totalInvestasi.toLocaleString()}`;
 
-        // 4. SWITCH ASSETS .GLB
-        const low = promptValue.toLowerCase();
-        if (low.includes("rumah") || low.includes("minimalis")) viewer.src = "aset1.glb";
-        else if (low.includes("villa") || low.includes("mewah")) viewer.src = "aset2.glb";
-        else if (low.includes("gedung") || low.includes("kantor")) viewer.src = "aset3.glb";
-        else if (low.includes("taman") || low.includes("park")) viewer.src = "aset4.glb";
+        // 3D Switch
+        const low = promptInput.value.toLowerCase();
+        if (low.includes("rumah")) viewer.src = "aset1.glb";
+        else if (low.includes("villa")) viewer.src = "aset2.glb";
+        else if (low.includes("gedung")) viewer.src = "aset3.glb";
+        else if (low.includes("taman")) viewer.src = "aset4.glb";
         else viewer.src = "aset1.glb";
 
     } catch (err) {
-        console.error(err);
-        alert("Gagal menganalisis. Coba lagi.");
+        alert("Gagal menganalisis.");
     } finally {
-        btn.innerHTML = `<span class="material-symbols-outlined text-lg">temp_preferences_custom</span><span>Analisis Proyek</span>`;
+        btn.innerHTML = `<span class="material-symbols-outlined">temp_preferences_custom</span><span>Analisis Proyek</span>`;
         btn.disabled = false;
     }
   }
 
-  // 5. THE FIX: STABLE EVENT LISTENERS
-  document.addEventListener('DOMContentLoaded', () => {
-    // Listener untuk tombol Start Project berdasarkan ID
-    const startBtn = document.getElementById('btn-test');
-    if (startBtn) {
-        startBtn.onclick = (e) => {
-            e.preventDefault();
-            openModal();
-        };
-    }
-
-    // Listener global (cadangan jika ID gagal)
-    document.addEventListener('click', (e) => {
-        if (e.target && e.target.id === 'btn-test') {
-            e.preventDefault();
-            openModal();
-        }
-    });
-
-    // Tutup modal saat klik luar
-    const modalOverlay = document.getElementById('ai-modal');
-    if (modalOverlay) {
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) closeModal();
-        });
-    }
-  });
+  // Close modal saat klik area luar
+  window.onclick = function(event) {
+    const modal = document.getElementById('ai-modal');
+    if (event.target == modal) closeModal();
+  }
 </script>
 </body></html>
