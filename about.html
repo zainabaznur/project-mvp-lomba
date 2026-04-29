@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>About Us | ARCHISCAN AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#00fd93",
+                        "primary": "#a2ffbf",
+                        "background": "#0b0e11",
+                        "surface-container-highest": "#22262b",
+                        "primary-dim": "#00ed89",
+                        "surface-container": "#161a1e",
+                        "surface": "#0b0e11",
+                        "outline": "#737679",
+                        "surface-container-low": "#101417",
+                        "on-surface": "#f8f9fe",
+                        "on-surface-variant": "#a9abaf",
+                        "surface-variant": "#22262b",
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Space Grotesk"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0b0e11;
+            color: #f8f9fe;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ghost-border {
+            border: 1px solid rgba(69, 72, 76, 0.15);
+        }
+        .hero-gradient {
+            background: radial-gradient(circle at top, rgba(0, 253, 147, 0.1) 0%, rgba(11, 14, 17, 0) 60%);
+        }
+ </style>
+<body class="selection:bg-primary-container selection:text-on-primary">
+
+<header class="flex justify-between items-center w-full px-4 md:px-8 h-16 sticky top-0 z-50 bg-slate-950/60 backdrop-blur-xl border-b border-white/10 font-['Plus_Jakarta_Sans'] tracking-tight shadow-[0_20px_40px_rgba(0,0,0,0.4),0_0_10px_rgba(0,255,148,0.05)]">
+    
+    <div class="text-lg md:text-xl font-bold tracking-tighter text-slate-50 uppercase">
+        ARCHISCAN AI
+    </div>
+    
+   <nav class="flex items-center gap-3 md:gap-8 text-sm md:text-base">
+        <a class="text-[#00FF94] border-b-2 border-[#00FF94] pb-1 font-medium" href="about.html">About Us</a>
+        <a class="text-slate-400 font-medium hover:text-white hover:bg-white/5 transition-all px-2 md:px-3 py-1 rounded-lg" href="index.html">Projects</a>
+        <a class="text-slate-400 font-medium hover:text-white hover:bg-white/5 transition-all px-2 md:px-3 py-1 rounded-lg" href="testimonial.html">Testimony</a>
+    </nav>
+
+    <div class="flex items-center gap-2 md:gap-4">
+        <button class="text-slate-400 hover:text-[#00FF94] transition-colors p-2 flex items-center justify-center">
+            <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+        </button>
+        <button class="text-slate-400 hover:text-[#00FF94] transition-colors p-2 flex items-center justify-center">
+            <span class="material-symbols-outlined" data-icon="settings">settings</span>
+        </button>
+    </div>
+
+</header>
+<main>
+
+    <main>
+        <section class="relative pt-32 pb-20 overflow-hidden">
+            <div class="absolute inset-0 hero-gradient z-0"></div>
+            <div class="container mx-auto px-6 relative z-10 text-center">
+                <span class="font-label text-primary uppercase tracking-[0.3em] text-xs md:text-sm mb-6 block">Our Story</span>
+                <h1 class="text-5xl md:text-7xl font-headline font-extrabold tracking-tighter text-on-surface mb-6 max-w-4xl mx-auto leading-tight">
+                    Redefining Architecture with <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-dim">Generative AI</span>
+                </h1>
+                <p class="text-lg text-on-surface-variant max-w-2xl mx-auto mb-12 leading-relaxed">
+                    Kami percaya bahwa desain struktur tidak harus memakan waktu berminggu-minggu. ARCHISCAN AI hadir untuk menjembatani ide-ide brilian dengan eksekusi visual 3D yang instan, presisi, dan dapat diandalkan.
+                </p>
+            </div>
+        </section>
+
+        <section class="py-16 container mx-auto px-6">
+    <div class="bg-surface-container-low rounded-[2rem] p-8 md:p-16 ghost-border relative overflow-hidden flex flex-col md:flex-row items-center gap-12">
+        <div class="w-full md:w-1/2 relative z-10">
+            <div class="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-6 border border-white/10">
+                <span class="material-symbols-outlined text-primary text-3xl">architecture</span>
+            </div>
+            <h2 class="text-3xl font-bold mb-6">Solusi Presisi untuk Konstruksi Modern.</h2>
+            <p class="text-on-surface-variant leading-relaxed mb-6">
+                Kami mendobrak proses perencanaan manual yang kaku dengan integrasi <strong>Parametric Design</strong> dan <strong>Machine Learning</strong>. <strong>Archiscan AI</strong> memungkinkan arsitek memvalidasi ide di lapangan, melakukan kustomisasi desain yang adaptif, dan mendapatkan prediksi anggaran akurat secara <em>real-time</em>—meminimalisir pemborosan material dan mempercepat pengambilan keputusan berbasis data.
+            </p>
+        </div>
+        <div class="w-full md:w-1/2">
+            <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2071&auto=format&fit=crop" alt="Modern Architecture Planning" class="rounded-2xl opacity-80 mix-blend-luminosity hover:opacity-100 transition-opacity duration-500 border border-white/10 shadow-2xl">
+        </div>
+    </div>
+</section>
+
+        <section class="py-24 container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-headline font-bold mb-4">Meet the Developers</h2>
+                <p class="text-on-surface-variant">Tim di balik layar yang membangun arsitektur sistem ARCHISCAN AI.</p>
+            </div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+    
+    <div class="group bg-surface-container rounded-3xl p-8 ghost-border hover:border-primary/50 transition-all duration-300 flex flex-col items-center text-center">
+        <div class="w-32 h-32 rounded-full overflow-hidden mb-6 border-2 border-primary/20 group-hover:border-primary transition-colors p-1">
+            <div class="w-full h-full rounded-full bg-slate-800 flex items-center justify-center overflow-hidden">
+                <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Salsabila&backgroundColor=00fd93" alt="Aurora Zalfa Hartono" class="w-full h-full object-cover">
+            </div>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-1">Aurora Zalfa Hartono</h3>
+        <p class="text-primary text-sm font-medium tracking-wide mb-4">Fullstack Developer & Lead Engineer</p>
+        <p class="text-on-surface-variant text-sm leading-relaxed">
+            Merancang arsitektur frontend interaktif dan mengelola integrasi backend Supabase. Berfokus pada pengalaman pengguna yang seamless dan penyelesaian bug tingkat tinggi.
+        </p>
+        <div class="flex gap-4 mt-6">
+            <a href="#" class="text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">code</span></a>
+        </div>
+    </div>
+
+    <div class="group bg-surface-container rounded-3xl p-8 ghost-border hover:border-primary/50 transition-all duration-300 flex flex-col items-center text-center">
+        <div class="w-32 h-32 rounded-full overflow-hidden mb-6 border-2 border-primary/20 group-hover:border-primary transition-colors p-1">
+            <div class="w-full h-full rounded-full bg-slate-800 flex items-center justify-center overflow-hidden">
+                <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Zainab&backgroundColor=22262b" alt="Zainab Aznur" class="w-full h-full object-cover">
+            </div>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-1">Zainab Aznur</h3>
+        <p class="text-primary text-sm font-medium tracking-wide mb-4">AI Integration & Spatial Engineer</p>
+        <p class="text-on-surface-variant text-sm leading-relaxed">
+            Menangani konektivitas dengan model Generative AI dan memastikan hasil terjemahan prompt berjalan akurat dengan library 3D Spline untuk visualisasi nyata.
+        </p>
+        <div class="flex gap-4 mt-6">
+            <a href="#" class="text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">api</span></a>
+        </div>
+    </div>
+
+    <div class="group bg-surface-container rounded-3xl p-8 ghost-border hover:border-primary/50 transition-all duration-300 flex flex-col items-center text-center">
+        <div class="w-32 h-32 rounded-full overflow-hidden mb-6 border-2 border-primary/20 group-hover:border-primary transition-colors p-1">
+            <div class="w-full h-full rounded-full bg-slate-800 flex items-center justify-center overflow-hidden">
+                <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Silvia&backgroundColor=22262b" alt="Silvia Zahrodiniah" class="w-full h-full object-cover">
+            </div>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-1">Silvia Zahrodiniah</h3>
+        <p class="text-primary text-sm font-medium tracking-wide mb-4">UI/UX Designer & 3D Modeler</p>
+        <p class="text-on-surface-variant text-sm leading-relaxed">
+            Menciptakan antarmuka yang intuitif dan memodelkan aset 3D untuk library arsitektur. Memastikan setiap interaksi terasa natural dan estetik bagi pengguna akhir.
+        </p>
+        <div class="flex gap-4 mt-6">
+            <a href="#" class="text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">design_services</span></a>
+        </div>
+    </div>
+
+</div>
+        </section>
+    </main>
+
+    <footer class="bg-surface-container-lowest py-10 border-t border-white/5">
+        <div class="container mx-auto px-6 text-center text-on-surface-variant">
+            <p class="text-xs font-label uppercase tracking-widest">© 2026 ARCHISCAN AI SYSTEMS. DEVELOPED BY Aurora, Zainab & Silvia.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

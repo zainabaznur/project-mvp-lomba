@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Testimonials | ARCHISCAN AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#00fd93",
+                        "primary": "#a2ffbf",
+                        "background": "#0b0e11",
+                        "surface-container-highest": "#22262b",
+                        "primary-dim": "#00ed89",
+                        "surface-container": "#161a1e",
+                        "surface": "#0b0e11",
+                        "outline": "#737679",
+                        "surface-container-low": "#101417",
+                        "on-surface": "#f8f9fe",
+                        "on-surface-variant": "#a9abaf",
+                        "surface-variant": "#22262b",
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Space Grotesk"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0b0e11;
+            color: #f8f9fe;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ghost-border {
+            border: 1px solid rgba(69, 72, 76, 0.15);
+        }
+        .hero-gradient {
+            background: radial-gradient(circle at top, rgba(0, 253, 147, 0.08) 0%, rgba(11, 14, 17, 0) 60%);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(0, 253, 147, 0.2);
+            border-color: rgba(0, 253, 147, 0.4);
+        }
+    </style>
+</head>
+<body class="selection:bg-primary-container selection:text-on-primary">
+
+<header class="flex justify-between items-center w-full px-4 md:px-8 h-16 sticky top-0 z-50 bg-slate-950/60 backdrop-blur-xl border-b border-white/10 font-['Plus_Jakarta_Sans'] tracking-tight shadow-[0_20px_40px_rgba(0,0,0,0.4),0_0_10px_rgba(0,255,148,0.05)]">
+    
+    <div class="text-lg md:text-xl font-bold tracking-tighter text-slate-50 uppercase">
+        ARCHISCAN AI
+    </div>
+    
+    <nav class="flex items-center gap-3 md:gap-8 text-sm md:text-base">
+        <a class="text-slate-400 font-medium hover:text-white hover:bg-white/5 transition-all px-2 md:px-3 py-1 rounded-lg" href="about.html">About Us</a>
+        <a class="text-slate-400 font-medium hover:text-white hover:bg-white/5 transition-all px-2 md:px-3 py-1 rounded-lg" href="index.html">Projects</a>
+        <a class="text-[#00FF94] border-b-2 border-[#00FF94] pb-1 font-medium" href="testimonial.html">Testimony</a>
+    </nav>
+
+    <div class="flex items-center gap-2 md:gap-4">
+        <button class="text-slate-400 hover:text-[#00FF94] transition-colors p-2 flex items-center justify-center">
+            <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+        </button>
+        <button class="text-slate-400 hover:text-[#00FF94] transition-colors p-2 flex items-center justify-center">
+            <span class="material-symbols-outlined" data-icon="settings">settings</span>
+        </button>
+    </div>
+
+</header>
+
+    <main>
+        <section class="relative pt-24 pb-12 overflow-hidden">
+            <div class="absolute inset-0 hero-gradient z-0"></div>
+            <div class="container mx-auto px-6 relative z-10 text-center">
+                <span class="font-label text-primary uppercase tracking-[0.3em] text-xs md:text-sm mb-4 block">What do they say about ArchiScan AI? See the real stories here</span>
+                <h1 class="text-4xl md:text-6xl font-headline font-extrabold tracking-tighter text-on-surface mb-6 leading-tight">
+                    Dipercaya oleh Ratusan <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-dim">Desainer & Arsitek</span>
+                </h1>
+                <p class="text-lg text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+                    Lihat bagaimana ARCHISCAN AI mengubah alur kerja tradisional menjadi lebih cepat, efisien, dan presisi.
+                </p>
+            </div>
+        </section>
+
+        <section class="py-12 container mx-auto px-6 mb-20">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <div class="bg-surface-container rounded-3xl p-8 ghost-border card-hover transition-all duration-300 flex flex-col justify-between h-full">
+                    <div>
+                        <div class="flex gap-1 text-primary mb-6">
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                        </div>
+                        <p class="text-on-surface text-lg leading-relaxed mb-8 italic">
+                            "Waktu survei lahan yang biasanya butuh berhari-hari, sekarang cukup scan pakai kamera HP. Analisis kontur dan batas tanahnya akurat banget buat referensi teknis!"
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-4 pt-6 border-t border-white/5">
+                        <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Anwar&backgroundColor=22262b" alt="Anwar" class="w-12 h-12 rounded-full border border-white/10 bg-slate-800">
+                        <div>
+                            <h4 class="font-bold text-white text-sm">Anwar</h4>
+                            <p class="text-xs text-on-surface-variant">Junior Architect</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-surface-container rounded-3xl p-8 ghost-border card-hover transition-all duration-300 flex flex-col justify-between h-full">
+                    <div>
+                        <div class="flex gap-1 text-primary mb-6">
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                        </div>
+                        <p class="text-on-surface text-lg leading-relaxed mb-8 italic">
+                            "Sangat membantu pas nentuin budget ke klien. Tiap kustomisasi desain diubah, fitur Instant Budget Predictor otomatis update biayanya. Negosiasi jadi super cepat."
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-4 pt-6 border-t border-white/5">
+                        <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Silva&backgroundColor=00fd93" alt="Silva" class="w-12 h-12 rounded-full border border-white/10 bg-slate-800">
+                        <div>
+                            <h4 class="font-bold text-white text-sm">Silva</h4>
+                            <p class="text-xs text-on-surface-variant">Quantity Surveyor</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-primary-container rounded-3xl p-8 ghost-border card-hover transition-all duration-300 flex flex-col justify-between h-full relative overflow-hidden">
+                    <div class="absolute -right-6 -top-6 text-black/10">
+                        <span class="material-symbols-outlined" style="font-size: 120px;">format_quote</span>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex gap-1 text-on-primary mb-6">
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                        </div>
+                        <p class="text-on-primary font-medium text-lg leading-relaxed mb-8 italic">
+                            "Sebagai kontraktor, bisa dapet Automated BoQ (Bill of Quantity) secara instan hanya dari pindaian lahan itu game changer banget. ARCHISCAN AI beneran se-powerful itu."
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-4 pt-6 border-t border-on-primary/10 relative z-10">
+                        <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Yusuf&backgroundColor=ffffff" alt="Yusuf" class="w-12 h-12 rounded-full border border-on-primary/20 bg-white">
+                        <div>
+                            <h4 class="font-bold text-on-primary text-sm">Yusuf</h4>
+                            <p class="text-xs text-on-primary/70">Project Manager</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-surface-container rounded-3xl p-8 ghost-border card-hover transition-all duration-300 flex flex-col justify-between h-full">
+                    <div>
+                        <div class="flex gap-1 text-primary mb-6">
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                            <span class="material-symbols-outlined">star</span>
+                        </div>
+                        <p class="text-on-surface text-lg leading-relaxed mb-8 italic">
+                            "Smart Design Customizer-nya cerdas banget. Klien bebas minta ubah jumlah lantai, tapi sistem otomatis ngebatesin supaya desain tetap aman dan realistis dengan lahan asli."
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-4 pt-6 border-t border-white/5">
+                        <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Zainab&backgroundColor=22262b" alt="Zainab" class="w-12 h-12 rounded-full border border-white/10 bg-slate-800">
+                        <div>
+                            <h4 class="font-bold text-white text-sm">Zainab</h4>
+                            <p class="text-xs text-on-surface-variant">Arsitek Independen</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-surface-container rounded-3xl p-8 ghost-border card-hover transition-all duration-300 flex flex-col justify-between h-full lg:col-span-2">
+                    <div class="flex flex-col md:flex-row gap-8 items-start md:items-center h-full">
+                        <div class="flex-1">
+                            <div class="flex gap-1 text-primary mb-4">
+                                <span class="material-symbols-outlined">star</span>
+                                <span class="material-symbols-outlined">star</span>
+                                <span class="material-symbols-outlined">star</span>
+                                <span class="material-symbols-outlined">star</span>
+                                <span class="material-symbols-outlined">star</span>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4">"Teknologi yang sangat mind-blowing."</h3>
+                            <p class="text-on-surface-variant leading-relaxed">
+                                "Semenjak pakai platform ini, diskusi awal dengan klien jadi jauh lebih interaktif. Lewat Interactive 3D Preview, mereka bisa langsung lihat visualisasi idenya secara real-time. Validasi desain jadi sangat instan!"
+                            </p>
+                        </div>
+                        <div class="md:border-l border-white/10 md:pl-8 flex items-center gap-4 md:flex-col md:text-center w-full md:w-auto mt-6 md:mt-0">
+                            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Lestari&backgroundColor=00fd93" alt="Lestari" class="w-16 h-16 rounded-full border border-white/10 bg-slate-800">
+                            <div>
+                                <h4 class="font-bold text-white text-sm">Lestari</h4>
+                                <p class="text-xs text-on-surface-variant">Senior Consultant</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="py-16 container mx-auto px-6 mb-10 text-center border-t border-white/5">
+            <h2 class="text-3xl font-headline font-bold mb-6">Siap untuk project Anda selanjutnya?</h2>
+            <a href="index.html" class="inline-flex items-center gap-2 bg-primary-container text-on-primary font-bold px-8 py-3 rounded-full hover:scale-105 transition-all">
+                Coba Sekarang <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </a>
+        </section>
+    </main>
+
+    <footer class="bg-surface-container-lowest py-10 border-t border-white/5">
+        <div class="container mx-auto px-6 text-center text-on-surface-variant">
+            <p class="text-xs font-label uppercase tracking-widest">© 2026 ARCHISCAN AI SYSTEMS. DEVELOPED BY Aurora, Zainab & Silvia.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
